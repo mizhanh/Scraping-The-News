@@ -25,7 +25,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(routes);
 
-// var MONGODB_URI = "mongodb://heroku"
+var MONGODB_URI = "mongodb://<dbuser>:<dbpassword>@ds257838.mlab.com:57838/heroku_sjcd465h";
 
 mongoose.Promise = Promise;
 var mongoDB = process.env.MONGODB_URI || "mongodb://localhost/Scraping-The-News";
