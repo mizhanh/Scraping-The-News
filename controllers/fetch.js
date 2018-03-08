@@ -18,7 +18,7 @@ module.exports = {
 					});
 				} else {
 					res.json({
-						message: "Added 20 new articles!"
+						message: "Added " + dbHeadline.length + " new articles!"
 					});
 				}
 			})

@@ -1,15 +1,13 @@
-/* global bootbox */
+
 $(document).ready(function() {
   
   var savedArticleDisplay = $("#savedArticleDisplay");
   
   $(document).on("click", ".btn.delete", deleteArticle);
-  $(document).on("click", ".btn.addNotes", articleNotes);
-  $(document).on("click", ".btn.save", saveNote);
+  $(document).on("click", ".btn.notes", articleNotes);
+  // $(document).on("click", ".btn.save", saveNote);
   $(document).on("click", ".btn.note-delete", deleteNote);
 
-
-  // initPage kicks everything off when the page is loaded
   initPage();
 
   //==================================================================================
@@ -48,10 +46,10 @@ $(document).ready(function() {
   }
 
   //==================================================================================
-  // Set up a panel for each article
+  // Set up a display for each article
   //==================================================================================
-  function setPanel(article) {
-    var panel = $(
+  function dataDisplay(article) {
+    var display = $(
       [
         "<div class='row'>",
         "<div class='col-md-8'>",
@@ -60,21 +58,21 @@ $(document).ready(function() {
         "</h2>",
         "</div>",
         "<div>",
-        "<button style='background-color:#761604; color:#fff; margin-left:5px; margin-right: 10px; padding:6px 12px; font-size:14px; text-line:center; border-radius:5px; font-weight:400; border:2px solid #761604;' class='btn delete'>Delete</button>",
+        "<button style='background-color:#761604; color:#fff; margin-top:30px; margin-left:5px; margin-right: 10px; font-size:14px; text-line:center; border-radius:5px; font-weight:400; border:2px solid #761604;' class='btn delete'>Delete</button>",
         "</div>",
         "<div>",
-        "<button style='background-color:#0082ff; color:#fff; margin-left 20px; padding:6px 12px; font-size:14px; text-line:center; border-radius:5px; font-weight:400; border:2px solid #0082ff;' type='button' class='btn addNotes'>Add Notes</button>",
+        "<button style='background-color:#0082ff; color:#fff; margin-top:30px; margin-left 20px; font-size:14px; text-line:center; border-radius:5px; font-weight:400; border:2px solid #0082ff;' type='button' class='btn notes'>Article Notes</button>",
         "</div>",
         "<div class='col-md-10'>",
-          "<p style='font-size:10px'><span style='font-weight:med; margin-left:10px; margin-top:10px;' class ='article-author'>" + article.author + "</p>",
-          "<p style='font-size:16px'>" + "<span style='font-weight:med; margin-left:10px; margin-top:5px;' class ='article-summary'>" + article.summary + "</p>",
+          "<p style='font-size:10px'><span style='font-weight:med; margin-left:10px;' class ='article-author'>" + article.author + "</p>",
+          "<p style='font-size:16px'>" + "<span style='font-weight:med; margin-left:10px;' class ='article-summary'>" + article.summary + "</p>",
         "</div>",
         "<hr>",
         "</div>"
 
       ].join(""));
-      panel.data("_id", article._id);
-      return panel;
+      display.data("_id", article._id);
+      return display;
     }
 
   //==================================================================================
@@ -85,7 +83,7 @@ $(document).ready(function() {
     var articleResults = [];
 
     for (var i = 0; i < articles.length; i++) {
-      articleResults.push(setPanel(articles[i]))    
+      articleResults.push(dataDisplay(articles[i]))    
     }
 
     savedArticleDisplay.append(articleResults);
@@ -100,50 +98,125 @@ $(document).ready(function() {
     
     $.ajax({
       method: "DELETE",
-      url: "/api/headlines/" + articleToDelete._id
+      url: "/api/headlines/" + articleToDelete._id,
     }).then(function(data) {
+
+      $.alert({
+        columnClass: 'col-md-6 col-md-offset-3',
+        title: "Article " + articleToDelete._id,
+        content: 'has been deleted',
+        type: 'blue',
+      });
+
       if (data.ok) {
         initPage();
       }
     });
   }
 
-
   //==================================================================================
-  // Set up notes modal for each article
+  // Add new notes in modal for each article
   //==================================================================================
   function articleNotes() {
 
     var currentArticle = $(this).parents(".row").data();
-    // Grab any notes with this headline/article id
-    $.get("/api/notes/" + currentArticle._id).then(function(data) {
-      // Constructing our initial HTML to add to the notes modal
-      var modalBox = [
-        "<div class='container text-center' style='background-color: blue'>",
-        "<h4>Notes For Article: ",
-        currentArticle._id,
-        "</h4>",
-        "<hr />",
-        "<ul class='list-group note-container'>",
-        "</ul>",
-        "<textarea placeholder='New Note' rows='10' cols='100'></textarea>",
-        "<button class='btn btn-success save'>Save Note</button>",
-        "</div>"
-      ].join("");
-      // Adding the formatted HTML to the note modal
-      mbox.prompt({
-        modalBox,
-        closeButton: true
-      });
-      var noteData = {
-        _id: currentArticle._id,
-        notes: data || []
-      };
+    var noteData;
+    var noteArray = [];
+    var currentNote;
 
-      $(".btn.save").data("article", noteData);
-      // renderNotes will populate the actual note HTML inside of the modal we just created/opened
-      renderNotes(noteData);
+    $.get("/api/notes/" + currentArticle._id).then(function(data) {
+      console.log(currentArticle._id);
+      // if (data.noteArray.length === null) {
+
+      $.confirm({
+        columnClass: 'col-md-8 col-md-offset-2',
+        title: 'Notes for ' + currentArticle._id,
+        content: '' + 
+        '<form action="" class="formName">' +
+        '<div class="form-group">' +
+        '<label>Notes</label>' +
+          '<input type="textarea" placeholder="Enter notes or comment here" class="note form-control" required />' +
+          '</div>' +
+          '</form>',
+          buttons: {
+            formSubmit: {
+            text: 'Save',
+            btnClass: 'btn-blue',
+            action: function () {
+              var createNote = this.$content.find('.note').val();
+              noteData = {
+                _id: currentArticle._id,
+                noteBody: createNote
+                };
+                $.post("/api/notes", noteData).then(function() {
+                  console.log(noteData);
+                   noteArray.push(noteData);
+                  $.alert({
+                      columnClass: 'col-md-8 col-md-offset-2',
+                      title: 'Notes for this article, ' + currentArticle._id + ', has been saved!',
+                      content: 'Your comment: ' + createNote  
+                  })     
+              })
+         }
+     },
+     cancel: function () {
+       
+    },
+ },
+ onContentReady: function () {
+    var jc = this;
+     this.$content.find('form').on('submit', function (e) {
+         // if the user submits the form by pressing enter in the field.
+        e.preventDefault();
+         jc.$$formSubmit.trigger('click'); // reference the button and click it
     });
+ }
+ });
+
+
+ //    } else {
+ //        for (var i = 0; i < data.noteArray.length; i++) {
+ //          currentNote = data.noteArray[i].noteBody;
+ //        }
+      
+ //        $.confirm({
+ //          columnClass: 'col-md-8 col-md-offset-2',
+ //          title: 'Notes for ' + currentArticle._id,
+ //          content: currentNote,
+ //          buttons: {
+ //            formSubmit: {
+ //            text: 'Delete',
+ //            btnClass: 'btn-red',
+ //            action: function () {
+ //              $.ajax({
+ //                url: "/api/notes/" + noteToDelete,
+ //                method: "DELETE"
+ //                }).then(function() {
+ //                  $.confirm({
+ //                      columnClass: 'col-md-8 col-md-offset-2',
+ //                      title: 'Notes for this article, ' + currentArticle._id + ', has been deleted!',
+ //              })       
+ //        })
+ //      }
+ //    },
+ //     cancel: function () {
+       
+ //    },
+ // },
+ // onContentReady: function () {
+ //    var jc = this;
+ //     this.$content.find('form').on('submit', function (e) {
+ //         // if the user submits the form by pressing enter in the field.
+ //        e.preventDefault();
+ //         jc.$$formSubmit.trigger('click'); // reference the button and click it
+ //    });
+ // }
+ 
+ //        })
+
+ //    }
+ })
+
   }
 
   //==================================================================================
@@ -163,40 +236,18 @@ $(document).ready(function() {
           [
             "<li class='list-group-item note'>",
             data.notes[i].noteBody,
-            "<button class='btn btn-danger note-delete'>x</button>",
+            "<button class='btn note-delete'>x</button>",
             "</li>"
           ].join("")
         );
       
         currentNote.children("button").data("_id", data.notes[i]._id);
-        // Adding currentNote to the notes array
+        
         notesArray.push(currentNote);
       }
     }
-    // Now append the notesArray to the note display inside the note modal
+    
     $(".noteDisplay").append(notesArray);
-  }
-
-
-  //==================================================================================
-  // Save a new note for the article
-  //==================================================================================
-  function saveNote() {
-    
-    var noteMsg;
-
-    var createNote = $(".bootbox-body textarea").val().trim();
-    
-    if (createNote) {
-      noteMsg = {
-        _id: $(this).data("article")._id,
-        noteBody: createNote
-      };
-      $.post("/api/notes", noteMsg).then(function() {
-  
-        mbox.hideAll();
-      });
-    }
   }
 
   //==================================================================================
@@ -209,9 +260,13 @@ $(document).ready(function() {
       url: "/api/notes/" + noteToDelete,
       method: "DELETE"
     }).then(function() {
-      bootbox.hideAll();
+      $.confirm({
+        columnClass: 'col-md-8 col-md-offset-2',
+        title: 'Notes for this article, ' + currentArticle._id + ', has been deleted!',
+      })
     });
   }
 
 
 });
+

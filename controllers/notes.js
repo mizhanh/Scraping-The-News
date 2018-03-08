@@ -3,6 +3,14 @@
 var db = require("../models");
 
 module.exports = {
+  //Find all notes
+  findAll: function(req, res) {
+    db.Note
+      .findAll(req.query)
+      .then(function(dbNote) {
+        res.json(dbNote);
+      })
+  },
   // Find one note
   findOne: function(req, res) {
     db.Note
