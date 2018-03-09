@@ -15,6 +15,7 @@ $(document).ready(function(){
 		$.get("/api/fetch").then(function(data){
 			initPage();		
 			$.alert({
+				theme: 'dark',
 				columnClass: 'col-md-6 col-md-offset-3',
 				title: data.message,
 				content: 'Happy Reading.',
@@ -63,7 +64,7 @@ $(document).ready(function(){
 			  "</h2>",
 			  "</div>",
         	  "<div class='col-md-2'>",
-        		"<button style='background-color:#737373; color:#fff; font-size:14px; text-line:center; border-radius:8px; font-weight:400; border:2px solid #343a40; margin-top:30px;' class='btn save'>Save Article</button>",
+        		"<button style='background-color:#737373; color:#fff; font-size:14px; text-line:center; border-radius:8px; font-weight:400; border:2px solid #343a40; margin-top:5px;' class='btn save'>Save Article</button>",
         	  "</div>",
         	  "</div>",
         	  "<div class='col-md-9'>",

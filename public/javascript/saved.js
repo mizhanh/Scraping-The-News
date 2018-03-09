@@ -5,7 +5,6 @@ $(document).ready(function() {
   
   $(document).on("click", ".btn.delete", deleteArticle);
   $(document).on("click", ".btn.notes", articleNotes);
-  // $(document).on("click", ".btn.save", saveNote);
   $(document).on("click", ".btn.note-delete", deleteNote);
 
   initPage();
@@ -58,10 +57,10 @@ $(document).ready(function() {
         "</h2>",
         "</div>",
         "<div>",
-        "<button style='background-color:#761604; color:#fff; margin-top:30px; margin-left:5px; margin-right: 10px; font-size:14px; text-line:center; border-radius:5px; font-weight:400; border:2px solid #761604;' class='btn delete'>Delete</button>",
+        "<button style='background-color:#761604; color:#fff; margin-top:5px; margin-left:5px; margin-right: 10px; font-size:14px; text-line:center; border-radius:5px; font-weight:400; border:2px solid #761604;' class='btn delete'>Delete</button>",
         "</div>",
         "<div>",
-        "<button style='background-color:#0082ff; color:#fff; margin-top:30px; margin-left 20px; font-size:14px; text-line:center; border-radius:5px; font-weight:400; border:2px solid #0082ff;' type='button' class='btn notes'>Article Notes</button>",
+        "<button style='background-color:#0082ff; color:#fff; margin-top:5px; margin-left 10px; font-size:14px; text-line:center; border-radius:5px; font-weight:400; border:2px solid #0082ff;' type='button' class='btn notes'>Article Notes</button>",
         "</div>",
         "<div class='col-md-10'>",
           "<p style='font-size:10px'><span style='font-weight:med; margin-left:10px;' class ='article-author'>" + article.author + "</p>",
@@ -102,6 +101,7 @@ $(document).ready(function() {
     }).then(function(data) {
 
       $.alert({
+        theme: 'dark',
         columnClass: 'col-md-6 col-md-offset-3',
         title: "Article " + articleToDelete._id,
         content: 'has been deleted',
@@ -126,98 +126,63 @@ $(document).ready(function() {
 
     $.get("/api/notes/" + currentArticle._id).then(function(data) {
       console.log(currentArticle._id);
-      // if (data.noteArray.length === null) {
 
-      $.confirm({
-        columnClass: 'col-md-8 col-md-offset-2',
-        title: 'Notes for ' + currentArticle._id,
-        content: '' + 
-        '<form action="" class="formName">' +
-        '<div class="form-group">' +
-        '<label>Notes</label>' +
-          '<input type="textarea" placeholder="Enter notes or comment here" class="note form-control" required />' +
-          '</div>' +
-          '</form>',
+      //model to input and save a new note for the article
+        $.confirm({
+          theme: 'dark',
+          columnClass: 'col-md-8 col-md-offset-2',
+          title: 'Notes for ' + currentArticle._id,
+          content: '' + 
+            '<form action="" class="formName">' +
+            '<div class="form-group">' +
+            '<label>Notes</label>' +
+            '<input type="textarea" placeholder="Enter notes or comment here" class="note form-control" required />' +
+            '</div>' +
+            '</form>',
           buttons: {
             formSubmit: {
-            text: 'Save',
-            btnClass: 'btn-blue',
-            action: function () {
-              var createNote = this.$content.find('.note').val();
-              noteData = {
-                _id: currentArticle._id,
-                noteBody: createNote
-                };
-                $.post("/api/notes", noteData).then(function() {
-                  console.log(noteData);
-                   noteArray.push(noteData);
-                  $.alert({
-                      columnClass: 'col-md-8 col-md-offset-2',
-                      title: 'Notes for this article, ' + currentArticle._id + ', has been saved!',
-                      content: 'Your comment: ' + createNote  
-                  })     
-              })
-         }
-     },
-     cancel: function () {
-       
-    },
- },
- onContentReady: function () {
-    var jc = this;
-     this.$content.find('form').on('submit', function (e) {
-         // if the user submits the form by pressing enter in the field.
-        e.preventDefault();
-         jc.$$formSubmit.trigger('click'); // reference the button and click it
-    });
- }
- });
+                text: 'Save',
+                btnClass: 'btn-blue',
+                action: function () {
+                  var createNote = this.$content.find('.note').val();
+                  noteData = {
+                    _id: currentArticle._id,
+                    noteBody: createNote
+                    };
 
-
- //    } else {
- //        for (var i = 0; i < data.noteArray.length; i++) {
- //          currentNote = data.noteArray[i].noteBody;
- //        }
-      
- //        $.confirm({
- //          columnClass: 'col-md-8 col-md-offset-2',
- //          title: 'Notes for ' + currentArticle._id,
- //          content: currentNote,
- //          buttons: {
- //            formSubmit: {
- //            text: 'Delete',
- //            btnClass: 'btn-red',
- //            action: function () {
- //              $.ajax({
- //                url: "/api/notes/" + noteToDelete,
- //                method: "DELETE"
- //                }).then(function() {
- //                  $.confirm({
- //                      columnClass: 'col-md-8 col-md-offset-2',
- //                      title: 'Notes for this article, ' + currentArticle._id + ', has been deleted!',
- //              })       
- //        })
- //      }
- //    },
- //     cancel: function () {
-       
- //    },
- // },
- // onContentReady: function () {
- //    var jc = this;
- //     this.$content.find('form').on('submit', function (e) {
- //         // if the user submits the form by pressing enter in the field.
- //        e.preventDefault();
- //         jc.$$formSubmit.trigger('click'); // reference the button and click it
- //    });
- // }
- 
- //        })
-
- //    }
- })
-
+                  $.post("/api/notes", noteData).then(function() {
+                    console.log(noteData);
+                    noteArray.push(noteData);
+                    console.log(noteArray); 
+                    currentNote = noteData.noteBody;
+                    console.log(currentNote);
+                  
+                     $.alert({
+                        theme: 'dark',
+                        columnClass: 'col-md-8 col-md-offset-2',
+                        title: 'Notes for ' + currentArticle._id + ' article has been saved!',
+                        content: 'You wrote: ' + createNote  
+                        })     
+                    })
+                  }
+            },
+            cancel: function () {
+            },
+          },
+          onContentReady: function () {
+              var jc = this;
+              this.$content.find('form').on('submit', function (e) {
+              // if the user submits the form by pressing enter in the field.
+              e.preventDefault();
+              jc.$$formSubmit.trigger('click'); // reference the button and click it
+              });
+          }
+        });
+        
+      });
   }
+      
+ 
 
   //==================================================================================
   // Article notes rendering
